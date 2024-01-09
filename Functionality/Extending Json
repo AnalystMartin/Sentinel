@@ -1,0 +1,10 @@
+"AdditionalFields", "ExtendedProperties", "Parameters" and other dynamic columns have subgroupings in Json format. If the fields follow a set paramter in front of the dynamic value , the data can be aggregated after transformation.
+
+One example of this is Shellcommands in DeviceEvents where the commands can only be aggregated once transformed; 
+DeviceEvents
+| where isnotempty( InitiatingProcessVersionInfoInternalFileName) and  InitiatingProcessVersionInfoInternalFileName =~"Powershell" and InitiatingProcessAccountName !~"system"
+| project AdditionalFields
+| extend PowershellCommand = tostring(parse_json(AdditionalFields).Command) 
+| where isnotempty( PowershellCommand) and PowershellCommand contains "base64"
+| project PowershellCommand
+| summarize ['Numbers of time Ran'] = count() by PowershellCommand
